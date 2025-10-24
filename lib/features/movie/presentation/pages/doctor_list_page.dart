@@ -1,76 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:datlichhen/features/movie/domain/entities/movie_entity.dart';
-import 'package:datlichhen/features/movie/domain/usecases/create_movie_usecase.dart';
-import 'package:datlichhen/features/movie/domain/usecases/delete_movie_usecase.dart';
-import 'package:datlichhen/features/movie/domain/usecases/get_all_movie.dart';
-import 'package:datlichhen/features/movie/domain/usecases/search_movie_usecase.dart';
-import 'package:datlichhen/features/movie/domain/usecases/update_movie_usecase.dart';
-import 'package:datlichhen/features/movie/data/datasources/movie_remote_datasource.dart';
-import 'package:datlichhen/features/movie/data/repositories/movie_repository_impl.dart';
-import 'movie_form_page.dart';
+import 'doctor_form_page.dart';
+import 'package:datlichhen/features/movie/domain/entities/doctor_entity.dart';
+import 'package:datlichhen/features/movie/data/datasources/doctor_remote_datasource.dart';
+import 'package:datlichhen/features/movie/data/repositories/doctor_repository_impl.dart';
+import 'package:datlichhen/features/movie/domain/usecases/get_all_doctor.dart';
+import 'package:datlichhen/features/movie/domain/usecases/create_doctor_usecase.dart';
+import 'package:datlichhen/features/movie/domain/usecases/update_doctor_usecase.dart';
+import 'package:datlichhen/features/movie/domain/usecases/delete_doctor_usecase.dart';
+import 'package:datlichhen/features/movie/domain/usecases/search_doctor_usecase.dart';
 
-class MovieListPage extends StatefulWidget {
-  const MovieListPage({super.key});
+class DoctorListPage extends StatefulWidget {
+  const DoctorListPage({super.key});
 
   @override
-  State<MovieListPage> createState() => _MovieListPageState();
+  State<DoctorListPage> createState() => _DoctorListPageState();
 }
 
-class _MovieListPageState extends State<MovieListPage> {
-  late final _remote = MovieRemoteDataSourceImpl();
-  late final _repo = MovieRepositoryImpl(_remote);
+class _DoctorListPageState extends State<DoctorListPage> {
+  late final _remote = DoctorRemoteDataSourceImpl();
+  late final _repo = DoctorRepositoryImpl(_remote);
 
-  late final _getAllMovies = GetAllMovies(_repo);
-  late final _addMovie = AddMovie(_repo);
-  late final _updateMovie = UpdateMovie(_repo);
-  late final _deleteMovie = DeleteMovie(_repo);
-  late final _searchMovies = GetMoviesByGenre(_repo);
+  late final _getAllDoctors = GetAllDoctors(_repo);
+  late final _addDoctor = AddDoctor(_repo);
+  late final _updateDoctor = UpdateDoctor(_repo);
+  late final _deleteDoctor = DeleteDoctor(_repo);
+  late final _searchDoctors = GetDoctorsByField(_repo);
 
-  List<Movie> _movies = [];
+  List<Doctor> _doctors = [];
   String _searchQuery = "";
-  String _selectedGenre = "Tất cả";
+  String _selectedChuyenKhoa = "Tất cả";
 
   final _searchController = TextEditingController();
-  final _genres = ["Tất cả", "Action", "Comedy", "Drama", "Horror", "Sci-Fi"];
+  final _chuyenKhoas = ["Tất cả", "Khoa tổng quát", "Nhi", "Sản", "Ngoại", "Tim mạch"];
 
   @override
   void initState() {
     super.initState();
-    _loadMovies();
+    _loadDoctors();
   }
 
-  Future<void> _loadMovies() async {
-    final movies = await _getAllMovies();
-    movies.sort((a, b) => b.year.compareTo(a.year));
-    setState(() => _movies = movies);
+  Future<void> _loadDoctors() async {
+    final doctors = await _getAllDoctors();
+    doctors.sort((a, b) => b.year.compareTo(a.year)); // mới nhất trước
+    setState(() => _doctors = doctors);
   }
 
   Future<void> _search() async {
-    if (_searchQuery.isEmpty && _selectedGenre == "Tất cả") {
-      _loadMovies();
+    if (_searchQuery.isEmpty && _selectedChuyenKhoa == "Tất cả") {
+      _loadDoctors();
     } else {
-      final results = await _searchMovies(_selectedGenre, _searchQuery);
-      setState(() => _movies = results);
+      // Nếu filter chọn "Tất cả" mà có query, tìm theo HoTen và SDT (kết hợp)
+      if (_selectedChuyenKhoa == "Tất cả") {
+        // tìm theo HoTen
+        final byName = await _searchDoctors('HoTen', _searchQuery);
+        // tìm theo SDT
+        final byPhone = await _searchDoctors('SDT', _searchQuery);
+        // hợp nhất kết quả (loại id trùng)
+        final map = <String, Doctor>{};
+        for (var d in byName) map[d.documentId] = d;
+        for (var d in byPhone) map[d.documentId] = d;
+        final results = map.values.toList();
+        results.sort((a, b) => b.year.compareTo(a.year));
+        setState(() => _doctors = results);
+      } else {
+        // Tìm theo chuyên khoa kết hợp query trên một field (ví dụ tìm tên)
+        final results = await _searchDoctors('ChuyenKhoa', _selectedChuyenKhoa);
+        // Nếu có query thêm, filter trên tên/SDT client-side
+        final filtered = results.where((d) {
+          final q = _searchQuery.toLowerCase();
+          return d.hoTen.toLowerCase().contains(q) ||
+              d.sdt.toLowerCase().contains(q);
+        }).toList();
+        filtered.sort((a, b) => b.year.compareTo(a.year));
+        setState(() => _doctors = filtered);
+      }
     }
   }
 
   Future<void> _delete(String id) async {
-    await _deleteMovie(id);
-    await _loadMovies();
+    await _deleteDoctor(id);
+    await _loadDoctors();
   }
 
-  Future<void> _openForm([Movie? movie]) async {
+  Future<void> _openForm([Doctor? doctor]) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MovieFormPage(
-          movie: movie,
-          addUseCase: _addMovie,
-          updateUseCase: _updateMovie,
+        builder: (_) => DoctorFormPage(
+          doctor: doctor,
+          addUseCase: _addDoctor,
+          updateUseCase: _updateDoctor,
         ),
       ),
     );
-    if (result == true) _loadMovies();
+    if (result == true) _loadDoctors();
   }
 
   @override
@@ -81,7 +104,7 @@ class _MovieListPageState extends State<MovieListPage> {
         elevation: 2,
         backgroundColor: Colors.deepPurple,
         title: const Text(
-          '🎬 Quản lý phim',
+          '🩺 Quản lý bác sĩ - 3Care',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -89,7 +112,6 @@ class _MovieListPageState extends State<MovieListPage> {
         ),
       ),
 
-      // 🔍 THANH TÌM KIẾM + FILTER
       body: Column(
         children: [
           Container(
@@ -108,11 +130,11 @@ class _MovieListPageState extends State<MovieListPage> {
                       child: TextField(
                         controller: _searchController,
                         decoration: const InputDecoration(
-                          hintText: "🔎 Tìm kiếm phim...",
+                          hintText: "🔎 Tìm theo tên hoặc số điện thoại...",
                           border: InputBorder.none,
                         ),
                         onChanged: (value) {
-                          setState(() => _searchQuery = value);
+                          setState(() => _searchQuery = value.trim());
                           _search();
                         },
                       ),
@@ -120,15 +142,15 @@ class _MovieListPageState extends State<MovieListPage> {
                     const SizedBox(width: 8),
                     DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: _selectedGenre,
-                        items: _genres
+                        value: _selectedChuyenKhoa,
+                        items: _chuyenKhoas
                             .map((g) => DropdownMenuItem(
                                   value: g,
                                   child: Text(g),
                                 ))
                             .toList(),
                         onChanged: (v) {
-                          setState(() => _selectedGenre = v!);
+                          setState(() => _selectedChuyenKhoa = v!);
                           _search();
                         },
                       ),
@@ -139,12 +161,11 @@ class _MovieListPageState extends State<MovieListPage> {
             ),
           ),
 
-          // 🎞️ DANH SÁCH DẠNG LƯỚI
           Expanded(
-            child: _movies.isEmpty
+            child: _doctors.isEmpty
                 ? const Center(
                     child: Text(
-                      'Không có phim nào!',
+                      'Không có bác sĩ nào!',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black54,
@@ -153,7 +174,7 @@ class _MovieListPageState extends State<MovieListPage> {
                     ),
                   )
                 : RefreshIndicator(
-                    onRefresh: _loadMovies,
+                    onRefresh: _loadDoctors,
                     child: GridView.builder(
                       padding: const EdgeInsets.all(12),
                       gridDelegate:
@@ -163,15 +184,15 @@ class _MovieListPageState extends State<MovieListPage> {
                         mainAxisSpacing: 12,
                         childAspectRatio: 2,
                       ),
-                      itemCount: _movies.length,
+                      itemCount: _doctors.length,
                       itemBuilder: (context, index) {
-                        final movie = _movies[index];
+                        final doctor = _doctors[index];
                         return GestureDetector(
-                          onTap: () => _showMovieDetail(movie),
+                          onTap: () => _showDoctorDetail(doctor),
                           child: Stack(
                             alignment: Alignment.bottomCenter,
                             children: [
-                              // Poster
+
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(16),
@@ -186,7 +207,7 @@ class _MovieListPageState extends State<MovieListPage> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16),
                                   child: Image.network(
-                                    movie.posterUrl,
+                                    doctor.imgUrl,
                                     height: double.infinity,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
@@ -196,9 +217,8 @@ class _MovieListPageState extends State<MovieListPage> {
                                 ),
                               ),
 
-                              // Overlay info
                               Container(
-                                height: 50,
+                                height: 60,
                                 decoration: BoxDecoration(
                                   borderRadius: const BorderRadius.vertical(
                                       bottom: Radius.circular(16)),
@@ -213,7 +233,6 @@ class _MovieListPageState extends State<MovieListPage> {
                                 ),
                               ),
 
-                              // Thông tin phim
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8.0),
@@ -221,7 +240,7 @@ class _MovieListPageState extends State<MovieListPage> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Text(
-                                      movie.title,
+                                      'Bn. ${doctor.hoTen}',
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: Colors.white,
@@ -236,7 +255,7 @@ class _MovieListPageState extends State<MovieListPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "${movie.genre} • ${movie.year}",
+                                      "${doctor.chuyenKhoa} • ${doctor.sdt}",
                                       style: const TextStyle(
                                         color: Colors.white70,
                                         fontSize: 13,
@@ -247,7 +266,6 @@ class _MovieListPageState extends State<MovieListPage> {
                                 ),
                               ),
 
-                              // Nút sửa / xóa
                               Positioned(
                                 top: 6,
                                 right: 6,
@@ -256,13 +274,13 @@ class _MovieListPageState extends State<MovieListPage> {
                                     _circleBtn(
                                       icon: Icons.edit,
                                       color: Colors.orangeAccent,
-                                      onTap: () => _openForm(movie),
+                                      onTap: () => _openForm(doctor),
                                     ),
                                     const SizedBox(width: 6),
                                     _circleBtn(
                                       icon: Icons.delete,
                                       color: Colors.redAccent,
-                                      onTap: () => _delete(movie.documentId),
+                                      onTap: () => _delete(doctor.documentId),
                                     ),
                                   ],
                                 ),
@@ -277,7 +295,6 @@ class _MovieListPageState extends State<MovieListPage> {
         ],
       ),
 
-      // ➕ FAB Thêm phim
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurple,
         onPressed: () => _openForm(),
@@ -286,7 +303,6 @@ class _MovieListPageState extends State<MovieListPage> {
     );
   }
 
-  // Widget nút tròn edit/xóa
   Widget _circleBtn({
     required IconData icon,
     required Color color,
@@ -306,8 +322,7 @@ class _MovieListPageState extends State<MovieListPage> {
     );
   }
 
-  // Xem chi tiết phim
-  void _showMovieDetail(Movie movie) {
+  void _showDoctorDetail(Doctor doctor) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -319,22 +334,36 @@ class _MovieListPageState extends State<MovieListPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(movie.title,
+            Text('Bn. ${doctor.hoTen}',
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text("Đạo diễn: ${movie.director}"),
-            Text("Thể loại: ${movie.genre}"),
-            Text("Năm: ${movie.year}"),
+            Text("SĐT: ${doctor.sdt}"),
+            Text("Chuyên khoa: ${doctor.chuyenKhoa}"),
+            Text("Năm thêm: ${doctor.year}"),
             const SizedBox(height: 10),
-            if (movie.trailerUrl.isNotEmpty)
-              TextButton.icon(
-                onPressed: () {
-                  // mở link trailer
-                },
-                icon: const Icon(Icons.play_circle_fill),
-                label: const Text("Xem Trailer"),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    _openForm(doctor);
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text("Chỉnh sửa"),
+                ),
+                const SizedBox(width: 10),
+                TextButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _delete(doctor.documentId);
+                  },
+                  icon: const Icon(Icons.delete),
+                  label: const Text("Xóa"),
+                ),
+              ],
+            )
           ],
         ),
       ),

@@ -1,67 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:datlichhen/features/movie/domain/entities/movie_entity.dart';
-import 'package:datlichhen/features/movie/domain/usecases/create_movie_usecase.dart';
-import 'package:datlichhen/features/movie/domain/usecases/update_movie_usecase.dart';
+import 'package:datlichhen/features/movie/domain/entities/doctor_entity.dart';
+import 'package:datlichhen/features/movie/domain/usecases/create_doctor_usecase.dart';
+import 'package:datlichhen/features/movie/domain/usecases/update_doctor_usecase.dart';
+class DoctorFormPage extends StatefulWidget {
+  final Doctor? doctor;
+  final AddDoctor addUseCase;
+  final UpdateDoctor updateUseCase;
 
-class MovieFormPage extends StatefulWidget {
-  final Movie? movie;
-  final AddMovie addUseCase;
-  final UpdateMovie updateUseCase;
-
-  const MovieFormPage({
+  const DoctorFormPage({
     super.key,
-    this.movie,
+    this.doctor,
     required this.addUseCase,
     required this.updateUseCase,
   });
 
   @override
-  State<MovieFormPage> createState() => _MovieFormPageState();
+  State<DoctorFormPage> createState() => _DoctorFormPageState();
 }
 
-class _MovieFormPageState extends State<MovieFormPage> {
+class _DoctorFormPageState extends State<DoctorFormPage> {
   final _formKey = GlobalKey<FormState>();
-  late String _title;
-  late String _director;
-  late String _genre;
+  late String _hoTen;
+  late String _sdt;
+  late String _chuyenKhoa;
   late int _year;
-  late String _posterUrl;
-  late String _trailerUrl;
+  late String _imgUrl;
 
-  final _genres = ['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi'];
+  final _chuyenKhoas = ['Khoa tổng quát', 'Nhi', 'Sản', 'Ngoại', 'Tim mạch'];
 
   @override
   void initState() {
     super.initState();
-    final m = widget.movie;
-    _title = m?.title ?? '';
-    _director = m?.director ?? '';
-    _genre = m?.genre ?? 'Action';
-    _year = m?.year ?? DateTime.now().year;
-    _posterUrl = m?.posterUrl ?? '';
-    _trailerUrl = m?.trailerUrl ?? '';
+    final d = widget.doctor;
+    _hoTen = d?.hoTen ?? '';
+    _sdt = d?.sdt ?? '';
+    _chuyenKhoa = d?.chuyenKhoa ?? _chuyenKhoas.first;
+    _year = d?.year ?? DateTime.now().year;
+    _imgUrl = d?.imgUrl ?? '';
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    final movie = Movie(
-      documentId: widget.movie?.documentId ?? '',
-      userId: widget.movie?.userId ?? 'unknown',
-      title: _title,
-      director: _director,
-      genre: _genre,
+    final doctor = Doctor(
+      documentId: widget.doctor?.documentId ?? '',
+      userId: widget.doctor?.userId ?? 'unknown',
+      hoTen: _hoTen,
+      sdt: _sdt,
+      chuyenKhoa: _chuyenKhoa,
       year: _year,
-      posterUrl: _posterUrl,
-      trailerUrl: _trailerUrl,
-      createdAt: widget.movie?.createdAt ?? DateTime.now(),
+      imgUrl: _imgUrl,
+      createdAt: widget.doctor?.createdAt ?? DateTime.now(),
     );
 
-    if (widget.movie == null) {
-      await widget.addUseCase(movie);
+    if (widget.doctor == null) {
+      await widget.addUseCase(doctor);
     } else {
-      await widget.updateUseCase(movie);
+      await widget.updateUseCase(doctor);
     }
 
     if (mounted) Navigator.pop(context, true);
@@ -69,7 +65,7 @@ class _MovieFormPageState extends State<MovieFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isEdit = widget.movie != null;
+    final isEdit = widget.doctor != null;
     final color = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -77,7 +73,7 @@ class _MovieFormPageState extends State<MovieFormPage> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          isEdit ? '🎬 Cập nhật phim' : '🎥 Thêm phim mới',
+          isEdit ? '✏️ Cập nhật bác sĩ' : '➕ Thêm bác sĩ mới',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: color.primaryContainer,
@@ -95,7 +91,7 @@ class _MovieFormPageState extends State<MovieFormPage> {
               key: _formKey,
               child: Column(
                 children: [
-                  // 🖼 Poster preview
+                  // 🖼 Ảnh bác sĩ preview
                   GestureDetector(
                     onTap: () {},
                     child: AnimatedContainer(
@@ -105,15 +101,15 @@ class _MovieFormPageState extends State<MovieFormPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         color: Colors.grey[200],
-                        image: _posterUrl.isNotEmpty
+                        image: _imgUrl.isNotEmpty
                             ? DecorationImage(
-                                image: NetworkImage(_posterUrl),
+                                image: NetworkImage(_imgUrl),
                                 fit: BoxFit.cover,
                                 onError: (_, __) {},
                               )
                             : null,
                       ),
-                      child: _posterUrl.isEmpty
+                      child: _imgUrl.isEmpty
                           ? const Center(
                               child: Icon(Icons.add_a_photo,
                                   size: 50, color: Colors.grey),
@@ -123,51 +119,53 @@ class _MovieFormPageState extends State<MovieFormPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // 🎞 Title
+                  // 👤 Họ tên
                   TextFormField(
-                    initialValue: _title,
-                    decoration: _input('Tên phim', Icons.movie_creation_outlined),
+                    initialValue: _hoTen,
+                    decoration: _input('Họ và tên (ví dụ: Bn. Nguyễn Văn A)', Icons.person),
                     validator: (v) =>
-                        v!.isEmpty ? 'Vui lòng nhập tên phim' : null,
-                    onSaved: (v) => _title = v!.trim(),
+                        v!.isEmpty ? 'Vui lòng nhập họ và tên bác sĩ' : null,
+                    onSaved: (v) => _hoTen = v!.trim(),
                   ),
                   const SizedBox(height: 16),
 
-                  // 👨‍💼 Director
+                  // 📞 Số điện thoại
                   TextFormField(
-                    initialValue: _director,
-                    decoration:
-                        _input('Đạo diễn', Icons.person_outline_rounded),
-                    validator: (v) =>
-                        v!.isEmpty ? 'Vui lòng nhập tên đạo diễn' : null,
-                    onSaved: (v) => _director = v!.trim(),
+                    initialValue: _sdt,
+                    decoration: _input('Số điện thoại', Icons.phone),
+                    keyboardType: TextInputType.phone,
+                    validator: (v) {
+                      final val = v?.trim() ?? '';
+                      if (val.isEmpty) return 'Vui lòng nhập số điện thoại';
+                      if (val.length < 7) return 'Số điện thoại không hợp lệ';
+                      return null;
+                    },
+                    onSaved: (v) => _sdt = v!.trim(),
                   ),
                   const SizedBox(height: 16),
 
-                  // 🎭 Genre
+                  // 🩺 Chuyên khoa
                   DropdownButtonFormField<String>(
-                    value: _genre,
-                    decoration: _input('Thể loại', Icons.category_outlined),
-                    items: _genres
+                    value: _chuyenKhoa,
+                    decoration: _input('Chuyên khoa', Icons.medical_services),
+                    items: _chuyenKhoas
                         .map((g) =>
-                            DropdownMenuItem(value: g, child: Text('🎬 $g')))
+                            DropdownMenuItem(value: g, child: Text(g)))
                         .toList(),
-                    onChanged: (v) => setState(() => _genre = v!),
+                    onChanged: (v) => setState(() => _chuyenKhoa = v!),
                   ),
                   const SizedBox(height: 16),
 
-                  // 📅 Year
+                  // 📅 Year (năm thêm)
                   TextFormField(
                     initialValue: _year.toString(),
                     decoration:
-                        _input('Năm phát hành', Icons.calendar_month_outlined),
+                        _input('Năm (dùng để sắp xếp, ví dụ 2025)', Icons.calendar_month),
                     keyboardType: TextInputType.number,
                     validator: (v) {
                       final y = int.tryParse(v ?? '');
-                      if (y == null ||
-                          y < 1900 ||
-                          y > DateTime.now().year + 1) {
-                        return 'Năm phát hành không hợp lệ';
+                      if (y == null || y < 1900 || y > DateTime.now().year + 1) {
+                        return 'Năm không hợp lệ';
                       }
                       return null;
                     },
@@ -175,21 +173,12 @@ class _MovieFormPageState extends State<MovieFormPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 🌆 Poster URL
+                  // 🌆 Img URL
                   TextFormField(
-                    initialValue: _posterUrl,
-                    decoration: _input('URL Poster (ảnh)', Icons.image_outlined),
-                    onChanged: (v) => setState(() => _posterUrl = v.trim()),
-                    onSaved: (v) => _posterUrl = v!.trim(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ▶ Trailer
-                  TextFormField(
-                    initialValue: _trailerUrl,
-                    decoration: _input('URL Trailer (YouTube)',
-                        Icons.play_circle_outline_rounded),
-                    onSaved: (v) => _trailerUrl = v!.trim(),
+                    initialValue: _imgUrl,
+                    decoration: _input('URL ảnh bác sĩ', Icons.image_outlined),
+                    onChanged: (v) => setState(() => _imgUrl = v.trim()),
+                    onSaved: (v) => _imgUrl = v!.trim(),
                   ),
                   const SizedBox(height: 15),
 
@@ -199,7 +188,7 @@ class _MovieFormPageState extends State<MovieFormPage> {
                     child: ElevatedButton.icon(
                       icon: Icon(isEdit ? Icons.save_outlined : Icons.add),
                       label: Text(
-                        isEdit ? 'Cập nhật phim' : 'Thêm phim',
+                        isEdit ? 'Cập nhật bác sĩ' : 'Thêm bác sĩ',
                         style: const TextStyle(
                             fontSize: 17, fontWeight: FontWeight.w600),
                       ),

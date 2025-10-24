@@ -1,12 +1,12 @@
+import 'package:datlichhen/features/movie/presentation/pages/doctor_list_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:datlichhen/features/movie/presentation/pages/movie_list_page.dart';
 import 'app_routes.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
 import 'go_router_refresh_change.dart';
 
 import '/features/auth/presentation/pages/sign_up_page.dart';
+import '/features/auth/presentation/pages/login_page.dart';
 
 class AppGoRouter {
   static final GoRouter router = GoRouter(
@@ -22,8 +22,8 @@ class AppGoRouter {
         builder: (context, state) => const SignUpPage(),
       ),
       GoRoute(
-        path: AppRoutes.movie,
-        builder: (context, state) => const MovieListPage(),
+        path: AppRoutes.doctor,
+        builder: (context, state) => const DoctorListPage(),
       ),
     ],
     redirect: (context, state) {
@@ -34,15 +34,16 @@ class AppGoRouter {
           state.matchedLocation == AppRoutes.signup;
       if (!loggedIn && !loggingIn) return AppRoutes.login;
 
-      if (loggedIn && loggingIn) return AppRoutes.movie;
+      if (loggedIn && loggingIn) return AppRoutes.doctor;
       return null;
     },
     refreshListenable: GoRouterRefreshStream(
       FirebaseAuth.instance.authStateChanges(),
     ),
   );
+
   static _getIndexForLocation(String path) {
-    if (path.startsWith(AppRoutes.movie)) return 0;
+    if (path.startsWith(AppRoutes.doctor)) return 0;
     return 0;
   }
 }
