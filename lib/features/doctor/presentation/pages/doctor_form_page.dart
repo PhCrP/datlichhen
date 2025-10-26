@@ -241,29 +241,50 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
               const SizedBox(height: 25),
 
               // 🖼 Upload ảnh (chưa xử lý chức năng upload thực tế)
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      // sau có thể thêm ImagePicker tại đây
-                    },
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.grey[300],
-                      backgroundImage:
-                          _imgUrl.isNotEmpty ? NetworkImage(_imgUrl) : null,
-                      child: _imgUrl.isEmpty
-                          ? const Icon(Icons.add_a_photo,
-                              color: Colors.green, size: 28)
-                          : null,
+              // 🖼 Ảnh upload
+              GestureDetector(
+                onTap: () {
+                  // TODO: Chức năng chọn ảnh hoặc chụp ảnh
+                },
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 45,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage: _imgUrl != null && _imgUrl!.isNotEmpty
+                              ? NetworkImage(_imgUrl!)
+                              : null,
+                          child: _imgUrl == null || _imgUrl!.isEmpty
+                              ? const Icon(Icons.person,
+                                  size: 50, color: Colors.grey)
+                              : null,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: const BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.photo_camera_outlined,
+                              size: 18, color: Colors.white),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text("Tải ảnh lên / Chụp ảnh",
-                      style:
-                          TextStyle(fontSize: 14, color: Colors.black54)),
-                ],
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Tải ảnh lên / Chụp ảnh',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: 40),
 
               const SizedBox(height: 35),
 
