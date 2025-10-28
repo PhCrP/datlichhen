@@ -2,110 +2,233 @@ import 'package:datlichhen/core/routing/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  // Hàm build icon PNG với kích thước chuẩn
+  Widget _pngIcon(String assetPath, {double size = 24, Color? color}) {
+    return Image.asset(
+      assetPath,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      color: color, // áp dụng màu tint nếu cần
+      errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 20, color: Colors.red),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        elevation: 0,
-        title: const Text(
-          '3Care',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.white),
-            onPressed: () => context.push(AppRoutes.notification), // ✅ chuyển trang
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // 🔹 Thanh xanh trên cùng
+          Container(
+            height: 43.27,
+            width: double.infinity,
+            color: const Color(0xFF43B02A),
           ),
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildStatCard(
-              context,
-              icon: Icons.medical_services_outlined,
-              title: "Bác sĩ",
-              count: 13,
-              onTap: () => context.push(AppRoutes.doctor),
+
+          // 🔹 AppBar trắng có bo góc dưới
+          Container(
+            height: 97,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  offset: Offset(0, 4),
+                  blurRadius: 6,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildStatCard(
-              context,
-              icon: Icons.people_outline,
-              title: "Bệnh nhân",
-              count: 100,
-              onTap: () {},
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '3Care',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: _pngIcon('assets/icons/notification.png', size: 26),
+                        onPressed: () => context.push(AppRoutes.notification),
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: _pngIcon('assets/icons/menu.png', size: 28.5),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildStatCard(
-              context,
-              icon: Icons.calendar_month_outlined,
-              title: "Lịch hẹn",
-              count: 13,
-              onTap: () {},
+          ),
+
+          // 🔹 Thẻ thống kê
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Container(
+                margin: const EdgeInsets.only(top: 35),
+                height: 587,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAEAEA),
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                child: Column(
+                  children: [
+                    _buildStatCard(
+                      context,
+                      iconPath: 'assets/icons/doctor_2.png',
+                      title: "Bác sĩ",
+                      count: 13,
+                      onTap: () => context.push(AppRoutes.doctor),
+                    ),
+                    _buildStatCard(
+                      context,
+                      iconPath: 'assets/icons/patient_2.png',
+                      title: "Bệnh nhân",
+                      count: 100,
+                      onTap: () {},
+                    ),
+                    _buildStatCard(
+                      context,
+                      iconPath: 'assets/icons/calendar_2.png',
+                      title: "Lịch hẹn",
+                      count: 13,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 1) context.push(AppRoutes.doctor);
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Trang chủ',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services_outlined),
-            label: 'Bác sĩ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            label: 'Bệnh nhân',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            label: 'Lịch hẹn',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Hồ sơ',
+
+          // 🔹 BottomNavigationBar
+          Container(
+            padding: const EdgeInsets.only(top: 10),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 6,
+                  offset: Offset(0, -3),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+              ),
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() => _currentIndex = index);
+                  if (index == 0) context.push(AppRoutes.home);
+                  if (index == 1) context.push(AppRoutes.doctor);
+                },
+                backgroundColor: Colors.white,
+                selectedItemColor: Colors.green,
+                unselectedItemColor: Colors.black,
+                
+                items: [
+                  BottomNavigationBarItem(
+                    icon: _pngIcon('assets/icons/home.png', color: Colors.black),
+                    activeIcon: _pngIcon('assets/icons/home.png', color: Colors.green),
+                    label: 'Trang chủ',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _pngIcon('assets/icons/doctor.png', color: Colors.black),
+                    activeIcon: _pngIcon('assets/icons/doctor.png', color: Colors.green),
+                    label: 'Bác sĩ',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _pngIcon('assets/icons/patient.png', color: Colors.black),
+                    activeIcon: _pngIcon('assets/icons/patient.png', color: Colors.green),
+                    label: 'Bệnh nhân',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _pngIcon('assets/icons/calendar.png', color: Colors.black),
+                    activeIcon: _pngIcon('assets/icons/calendar.png', color: Colors.green),
+                    label: 'Lịch hẹn',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _pngIcon('assets/icons/profile.png', color: Colors.black),
+                    activeIcon: _pngIcon('assets/icons/profile.png', color: Colors.green),
+                    label: 'Hồ sơ',
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(BuildContext context,
-      {required IconData icon,
-      required String title,
-      required int count,
-      required VoidCallback onTap}) {
+  // 🔹 Thẻ thống kê (dùng icon PNG)
+  Widget _buildStatCard(
+    BuildContext context,{
+    required String iconPath,
+    required String title,
+    required int count,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        height: 164.67,
+        margin: const EdgeInsets.only(top: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -113,32 +236,48 @@ class HomePage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Icon + Text
             Row(
               children: [
-                Icon(icon, size: 40, color: Colors.black87),
-                const SizedBox(width: 12),
+                _pngIcon(iconPath, size: 58),
+                const SizedBox(width: 16),
                 Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(count.toString(),
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      count.toString(),
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
+
+            // Khối xanh bên phải
             Container(
-              height: 48,
-              width: 48,
+              height: 90,
+              width: 81,
               decoration: BoxDecoration(
-                color: Colors.blue[700],
-                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFF0A58FF),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.bar_chart, color: Colors.white),
+              child: Center(
+                child: _pngIcon('assets/icons/chart.png', size: 42.66, color: Colors.white),
+              ),
             ),
           ],
         ),
