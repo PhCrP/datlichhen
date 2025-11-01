@@ -19,7 +19,8 @@ class HomePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none, color: Colors.white),
-            onPressed: () => context.push(AppRoutes.notification), // ✅ chuyển trang
+            onPressed: () =>
+                context.push(AppRoutes.notification), // ✅ chuyển trang
           ),
           IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
@@ -44,7 +45,7 @@ class HomePage extends StatelessWidget {
               icon: Icons.people_outline,
               title: "Bệnh nhân",
               count: 100,
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.patient),
             ),
             const SizedBox(height: 16),
             _buildStatCard(
@@ -52,7 +53,7 @@ class HomePage extends StatelessWidget {
               icon: Icons.calendar_month_outlined,
               title: "Lịch hẹn",
               count: 13,
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.appointment),
             ),
           ],
         ),
@@ -62,6 +63,8 @@ class HomePage extends StatelessWidget {
         currentIndex: 0,
         onTap: (index) {
           if (index == 1) context.push(AppRoutes.doctor);
+          if (index == 2) context.push(AppRoutes.patient);
+          if (index == 3) context.push(AppRoutes.appointment);
         },
         items: const [
           BottomNavigationBarItem(
@@ -89,11 +92,13 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context,
-      {required IconData icon,
-      required String title,
-      required int count,
-      required VoidCallback onTap}) {
+  Widget _buildStatCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required int count,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -120,13 +125,21 @@ class HomePage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(count.toString(),
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
+                    Text(
+                      count.toString(),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ],

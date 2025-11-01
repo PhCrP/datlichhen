@@ -1,4 +1,6 @@
 import 'package:datlichhen/features/doctor/presentation/pages/doctor_list_page.dart';
+import 'package:datlichhen/features/patient/presentation/pages/patient_list_page.dart';
+import 'package:datlichhen/features/appointment/presentation/pages/appointment_page.dart';
 import 'package:datlichhen/features/notification/presentation/pages/notification_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,15 +8,16 @@ import 'package:go_router/go_router.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_change.dart';
 import 'package:datlichhen/features/home/presentation/pages/home_page.dart';
-
+import 'package:datlichhen/features/splash/presentation/pages/splash_page.dart';
 import '/features/auth/presentation/pages/sign_up_page.dart';
 import '/features/auth/presentation/pages/login_page.dart';
 
 class AppGoRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: '/',
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(path: '/', builder: (context, state) => const SplashPage()),
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const HomePage(),
@@ -32,13 +35,27 @@ class AppGoRouter {
         builder: (context, state) => const DoctorListPage(),
       ),
       GoRoute(
+        path: AppRoutes.patient,
+        builder: (context, state) => const PatientListPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.appointment,
+        builder: (context, state) => const AppointmentPage(),
+      ),
+
+      GoRoute(
         path: AppRoutes.notification,
         builder: (context, state) => const NotificationPage(),
       ),
     ],
+
     redirect: (context, state) {
       final user = FirebaseAuth.instance.currentUser;
       final loggedIn = user != null;
+      if (state.matchedLocation == '/' ||
+          state.matchedLocation == AppRoutes.splash) {
+        return null;
+      }
       final loggingIn =
           state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.signup;
