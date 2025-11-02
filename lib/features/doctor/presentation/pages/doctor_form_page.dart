@@ -59,10 +59,7 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
             const SizedBox(height: 10),
             Text(
               message,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 5),
@@ -75,18 +72,23 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
               onPressed: () {
                 Navigator.pop(context); // đóng dialog
                 Navigator.pop(context, true); // quay lại trang danh sách
               },
-              child: const Text("OK",
-                  style: TextStyle(color: Colors.white, fontSize: 16)),
-            )
+              child: const Text(
+                "OK",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
           ],
         ),
       ),
@@ -145,7 +147,10 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
       _showSuccessDialog("Thêm bác sĩ thành công", "Dữ liệu đã được lưu");
     } else {
       await widget.updateUseCase(doctor);
-      _showSuccessDialog("Cập nhật bác sĩ thành công", "Dữ liệu đã được cập nhật");
+      _showSuccessDialog(
+        "Cập nhật bác sĩ thành công",
+        "Dữ liệu đã được cập nhật",
+      );
     }
   }
 

@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:datlichhen/core/routing/app_routes.dart';
-import 'doctor_form_page.dart';
-import 'package:datlichhen/features/doctor/domain/entities/doctor_entity.dart';
-import 'package:datlichhen/features/doctor/data/datasources/doctor_remote_datasource.dart';
-import 'package:datlichhen/features/doctor/data/repositories/doctor_repository_impl.dart';
-import 'package:datlichhen/features/doctor/domain/usecases/get_all_doctor.dart';
-import 'package:datlichhen/features/doctor/domain/usecases/create_doctor_usecase.dart';
-import 'package:datlichhen/features/doctor/domain/usecases/update_doctor_usecase.dart';
-import 'package:datlichhen/features/doctor/domain/usecases/delete_doctor_usecase.dart';
-import 'package:datlichhen/features/doctor/domain/usecases/search_doctor_usecase.dart';
+import 'patient_form_page.dart';
+import 'package:datlichhen/features/patient/domain/entities/patient_entity.dart';
+import 'package:datlichhen/features/patient/data/datasources/patient_remote_datasource.dart';
+import 'package:datlichhen/features/patient/data/repositories/patient_repository_impl.dart';
+import 'package:datlichhen/features/patient/domain/usecases/get_all_patient.dart';
+import 'package:datlichhen/features/patient/domain/usecases/create_patient_usecase.dart';
+import 'package:datlichhen/features/patient/domain/usecases/update_patient_usecase.dart';
+import 'package:datlichhen/features/patient/domain/usecases/delete_patient_usecase.dart';
+import 'package:datlichhen/features/patient/domain/usecases/search_patient_usecase.dart';
 
-class DoctorListPage extends StatefulWidget {
-  const DoctorListPage({super.key});
+class PatientListPage extends StatefulWidget {
+  const PatientListPage({super.key});
 
   @override
-  State<DoctorListPage> createState() => _DoctorListPageState();
+  State<PatientListPage> createState() => _PatientListPageState();
 }
 
-class _DoctorListPageState extends State<DoctorListPage> {
-  int _currentIndex = 1;
+class _PatientListPageState extends State<PatientListPage> {
+  int _currentIndex = 2;
 
-  late final _remote = DoctorRemoteDataSourceImpl();
-  late final _repo = DoctorRepositoryImpl(_remote);
+  late final _remote = PatientRemoteDataSourceImpl();
+  late final _repo = PatientRepositoryImpl(_remote);
 
-  late final _getAllDoctors = GetAllDoctors(_repo);
-  late final _addDoctor = AddDoctor(_repo);
-  late final _updateDoctor = UpdateDoctor(_repo);
-  late final _deleteDoctor = DeleteDoctor(_repo);
-  late final _searchDoctors = GetDoctorsByField(_repo);
+  late final _getAllPatients = GetAllPatients(_repo);
+  late final _addPatient = AddPatient(_repo);
+  late final _updatePatient = UpdatePatient(_repo);
+  late final _deletePatient = DeletePatient(_repo);
+  late final _searchPatients = GetPatientsByField(_repo);
 
-  List<Doctor> _doctors = [];
+  List<Patient> _patients = [];
   String _searchQuery = "";
 
   final _searchController = TextEditingController();
@@ -38,45 +38,45 @@ class _DoctorListPageState extends State<DoctorListPage> {
   @override
   void initState() {
     super.initState();
-    _loadDoctors();
+    _loadPatients();
   }
 
-  Future<void> _loadDoctors() async {
-    final doctors = await _getAllDoctors();
-    setState(() => _doctors = doctors);
+  Future<void> _loadPatients() async {
+    final patients = await _getAllPatients();
+    setState(() => _patients = patients);
   }
 
   Future<void> _search() async {
     if (_searchQuery.isEmpty) {
-      _loadDoctors();
+      _loadPatients();
       return;
     }
-    final byName = await _searchDoctors('HoTen', _searchQuery);
-    final byPhone = await _searchDoctors('SDT', _searchQuery);
-    final map = <String, Doctor>{};
-    for (var d in byName) map[d.documentId] = d;
-    for (var d in byPhone) map[d.documentId] = d;
-    setState(() => _doctors = map.values.toList());
+    final byName = await _searchPatients('name', _searchQuery);
+    final byPhone = await _searchPatients('phone', _searchQuery);
+    final map = <String, Patient>{};
+    for (var p in byName) map[p.documentId] = p;
+    for (var p in byPhone) map[p.documentId] = p;
+    setState(() => _patients = map.values.toList());
   }
 
   Future<void> _delete(String id) async {
-    await _deleteDoctor(id);
-    _showSuccessDialog("Xóa bác sĩ thành công", "Dữ liệu đã được cập nhật");
-    await _loadDoctors();
+    await _deletePatient(id);
+    _showSuccessDialog("Xóa bệnh nhân thành công", "Dữ liệu đã được cập nhật");
+    await _loadPatients();
   }
 
-  Future<void> _openForm([Doctor? doctor]) async {
+  Future<void> _openForm([Patient? patient]) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => DoctorFormPage(
-          doctor: doctor,
-          addUseCase: _addDoctor,
-          updateUseCase: _updateDoctor,
+        builder: (_) => PatientFormPage(
+          patient: patient,
+          addUseCase: _addPatient,
+          updateUseCase: _updatePatient,
         ),
       ),
     );
-    if (result == true) _loadDoctors();
+    if (result == true) _loadPatients();
   }
 
   void _showSuccessDialog(String message, String subMessage) {
@@ -157,12 +157,7 @@ class _DoctorListPageState extends State<DoctorListPage> {
             height: 95,
             decoration: const BoxDecoration(color: Colors.white),
             child: Padding(
-              padding: const EdgeInsets.only(
-                top: 0,
-                left: 8,
-                right: 8,
-                bottom: 0,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -174,7 +169,7 @@ class _DoctorListPageState extends State<DoctorListPage> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Text(
-                    'Quản lý bác sĩ',
+                    'Quản lý bệnh nhân',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 20,
@@ -187,7 +182,7 @@ class _DoctorListPageState extends State<DoctorListPage> {
             ),
           ),
 
-          // ✅ Khu thêm + tìm kiếm
+          // ✅ Nút thêm + tìm kiếm nằm ngoài
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
@@ -201,13 +196,10 @@ class _DoctorListPageState extends State<DoctorListPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     child: const Text(
-                      'Thêm bác sĩ',
+                      'Thêm bệnh nhân',
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
@@ -216,20 +208,20 @@ class _DoctorListPageState extends State<DoctorListPage> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Tìm bác sĩ...',
+                    hintText: 'Tìm bệnh nhân...',
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 12,
-                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: const BorderSide(
                         color: Colors.black12,
                         width: 1,
                       ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
                     ),
                   ),
                   onChanged: (value) {
@@ -242,47 +234,167 @@ class _DoctorListPageState extends State<DoctorListPage> {
           ),
           const SizedBox(height: 16),
 
-          // ✅ Khối bao danh sách
+          // ✅ Khối danh sách
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                top: 0,
-                left: 16,
-                right: 16,
-                bottom: 0,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 height: 515,
-                width: double.infinity,
-                padding: const EdgeInsets.only(
-                  top: 0,
-                  left: 16,
-                  right: 16,
-                  bottom: 0,
-                ),
                 decoration: BoxDecoration(
-                  color: Color(0xFFEAEAEA),
+                  color: const Color(0xFFEAEAEA),
                   borderRadius: BorderRadius.circular(25),
                 ),
-                child: _doctors.isEmpty
+                padding: const EdgeInsets.all(16),
+                child: _patients.isEmpty
                     ? const Center(
                         child: Text(
-                          'Không có bác sĩ nào!',
+                          'Không có bệnh nhân nào!',
                           style: TextStyle(color: Colors.black54, fontSize: 16),
                         ),
                       )
                     : ListView.builder(
-                        itemCount: _doctors.length,
+                        itemCount: _patients.length,
                         itemBuilder: (context, index) {
-                          return _buildDoctorCard(_doctors[index]);
+                          return _buildPatientCard(_patients[index]);
                         },
                       ),
               ),
             ),
           ),
 
-          // ✅ Bottom nav bar
+          // ✅ Bottom navigation bar
           _buildBottomNavBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPatientCard(Patient patient) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hàng thông tin
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const CircleAvatar(
+                radius: 32,
+                backgroundImage: AssetImage(
+                  'assets/images/default_patient.png',
+                ),
+              ),
+              const SizedBox(width: 14),
+
+              // Thông tin bệnh nhân
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BN. ${patient.name}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Giới tính: ${patient.gender}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'SĐT: ${patient.phone}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Triệu chứng: ${patient.symptom}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // 🔹 Hai nút Cập nhật & Xóa
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: 130,
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: () => _openForm(patient),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFA4AAAE),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Cập nhật",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 130,
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: () => _delete(patient.documentId),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE90C0C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Xóa",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -365,157 +477,6 @@ class _DoctorListPageState extends State<DoctorListPage> {
               label: 'Hồ sơ',
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDoctorCard(Doctor doctor) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Ảnh bác sĩ
-              CircleAvatar(
-                radius: 32,
-                backgroundImage: doctor.imgUrl.isNotEmpty
-                    ? NetworkImage(doctor.imgUrl)
-                    : const AssetImage('assets/images/default_doctor.png')
-                          as ImageProvider,
-              ),
-              const SizedBox(width: 14),
-
-              // Thông tin bác sĩ
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'BS. ${doctor.hoTen}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Chuyên khoa: ${doctor.chuyenKhoa}',
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'SĐT: ${doctor.sdt}',
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // 🔹 Hai nút Cập nhật & Xóa cách đều rìa
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Nút Cập nhật
-              SizedBox(
-                width: 130,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => _openForm(doctor),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFA4AAAE),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: EdgeInsets.zero,
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "Cập nhật",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-
-              // Nút Xóa
-              SizedBox(
-                width: 130,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () => _delete(doctor.documentId),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFE90C0C),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: EdgeInsets.zero,
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "Xóa",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _roundedButton({
-    required String text,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        minimumSize: const Size(125, 40),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
         ),
       ),
     );

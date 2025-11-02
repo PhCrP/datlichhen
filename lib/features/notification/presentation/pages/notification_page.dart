@@ -34,10 +34,7 @@ class NotificationPage extends StatelessWidget {
         ),
         title: const Text(
           'Thông báo',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
