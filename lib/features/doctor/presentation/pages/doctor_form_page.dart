@@ -20,7 +20,6 @@ class DoctorFormPage extends StatefulWidget {
 }
 
 class _DoctorFormPageState extends State<DoctorFormPage> {
-  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _chuyenKhoaController = TextEditingController();
@@ -47,7 +46,6 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
     super.dispose();
   }
 
-  /// ✅ Hiển thị popup thành công sau khi lưu
   void _showSuccessDialog(String message, String subMessage) {
     showDialog(
       context: context,
@@ -96,24 +94,20 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
   }
 
   /// ✅ Validate logic
-  bool _validateForm() {
+  bool _validate() {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final chuyenKhoa = _chuyenKhoaController.text.trim();
 
-    if (name.isEmpty) {
+    if (_nameController.text.trim().isEmpty) {
       _showError("Vui lòng nhập họ và tên bác sĩ");
       return false;
     }
-    if (phone.isEmpty) {
+    if (_phoneController.text.trim().isEmpty) {
       _showError("Vui lòng nhập số điện thoại");
       return false;
     }
-    if (!RegExp(r'^(0[0-9]{9,10})$').hasMatch(phone)) {
-      _showError("Số điện thoại không hợp lệ (phải bắt đầu bằng 0)");
-      return false;
-    }
-    if (chuyenKhoa.isEmpty) {
+    if (_chuyenKhoaController.text.trim().isEmpty) {
       _showError("Vui lòng nhập chuyên khoa");
       return false;
     }
@@ -132,10 +126,9 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
   }
 
   Future<void> _saveDoctor() async {
-    if (!_validateForm()) return;
+    if (!_validate()) return;
 
     final now = DateTime.now();
-
     final doctor = Doctor(
       documentId: widget.doctor?.documentId ?? '',
       userId: widget.doctor?.userId ?? 'unknown',
@@ -165,50 +158,61 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        centerTitle: true,
         title: Text(
           isEdit ? "Cập nhật bác sĩ" : "Thêm bác sĩ",
           style: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(4),
+          child: ColoredBox(
+            color: Color(0xFF32A852), // ✅ Thanh xanh trên cùng (giống figma)
+            child: SizedBox(height: 4),
+          ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 👤 Họ tên bác sĩ
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Họ và tên bác sĩ",
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700])),
+              const SizedBox(height: 10),
+
+              /// 🧑‍⚕️ Họ và tên bác sĩ
+              const Text(
+                "Họ và tên bác sĩ",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
               ),
               const SizedBox(height: 6),
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(
                   hintText: "Nguyễn Văn A",
-                  border: UnderlineInputBorder(),
+                  hintStyle: TextStyle(color: Colors.black38),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
 
-              // 📞 Số điện thoại
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Số điện thoại",
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700])),
+              const SizedBox(height: 22),
+
+              /// 📞 Số điện thoại
+              const Text(
+                "Số điện thoại",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
               ),
               const SizedBox(height: 6),
               TextField(
@@ -216,99 +220,112 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   hintText: "0909090909",
-                  border: UnderlineInputBorder(),
+                  hintStyle: TextStyle(color: Colors.black38),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
 
-              // 🩺 Chuyên khoa
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Chuyên khoa",
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700])),
+              const SizedBox(height: 22),
+
+              /// 🩺 Chuyên khoa
+              const Text(
+                "Chuyên khoa",
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
               ),
               const SizedBox(height: 6),
               TextField(
                 controller: _chuyenKhoaController,
                 decoration: const InputDecoration(
                   hintText: "VD: Nội tổng hợp",
-                  border: UnderlineInputBorder(),
+                  hintStyle: TextStyle(color: Colors.black38),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
                 ),
               ),
-              const SizedBox(height: 25),
 
-              // 🖼 Upload ảnh (chưa xử lý chức năng upload thực tế)
-              // 🖼 Ảnh upload
-              GestureDetector(
-                onTap: () {
-                  // TODO: Chức năng chọn ảnh hoặc chụp ảnh
-                },
+              const SizedBox(height: 30),
+
+              /// 🖼 Ảnh bác sĩ + icon upload
+              Center(
                 child: Column(
                   children: [
                     Stack(
                       alignment: Alignment.bottomRight,
                       children: [
                         CircleAvatar(
-                          radius: 45,
+                          radius: 40,
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: _imgUrl != null && _imgUrl!.isNotEmpty
-                              ? NetworkImage(_imgUrl!)
+                          backgroundImage: _imgUrl.isNotEmpty
+                              ? NetworkImage(_imgUrl)
                               : null,
-                          child: _imgUrl == null || _imgUrl!.isEmpty
-                              ? const Icon(Icons.person,
-                                  size: 50, color: Colors.grey)
+                          child: _imgUrl.isEmpty
+                              ? const Icon(
+                                  Icons.person,
+                                  size: 45,
+                                  color: Colors.grey,
+                                )
                               : null,
                         ),
                         Container(
-                          padding: const EdgeInsets.all(5),
+                          padding: const EdgeInsets.all(4),
                           decoration: const BoxDecoration(
                             color: Colors.green,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.photo_camera_outlined,
-                              size: 18, color: Colors.white),
+                          child: const Icon(
+                            Icons.add_a_photo,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     const Text(
-                      'Tải ảnh lên / Chụp ảnh',
+                      "Tải ảnh lên / Chụp ảnh",
                       style: TextStyle(
-                        color: Colors.black54,
                         fontWeight: FontWeight.w500,
+                        color: Colors.black87,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 45),
 
-              // ✅ Nút lưu
+              /// 🔵 Nút Lưu bác sĩ
               SizedBox(
                 width: double.infinity,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: _saveDoctor,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                    backgroundColor: const Color(0xFF0D99FF),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 0,
                   ),
                   child: Text(
                     isEdit ? "Cập nhật bác sĩ" : "Lưu bác sĩ",
                     style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
