@@ -1,3 +1,4 @@
+import 'package:datlichhen/core/routing/app_routes.dart';
 import 'package:flutter/material.dart';
 
 class NotificationPage extends StatelessWidget {
@@ -25,18 +26,48 @@ class NotificationPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(138.27),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(height: 43.27, color: const Color(0xFF43B02A)),
+            // AppBar trắng
+            Container(
+              height: 95,
+              decoration: const BoxDecoration(color: Colors.white),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 0,
+                  left: 8,
+                  right: 8,
+                  bottom: 0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Text(
+                      'Thông báo',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 40),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-        title: const Text(
-          'Thông báo',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -79,35 +110,8 @@ class NotificationPage extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 0) Navigator.pop(context);
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Trang chủ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services_outlined),
-            label: 'Bác sĩ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            label: 'Bệnh nhân',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            label: 'Lịch hẹn',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Hồ sơ',
-          ),
-        ],
-      ),
-    );
+      
+      );
   }
+
 }
