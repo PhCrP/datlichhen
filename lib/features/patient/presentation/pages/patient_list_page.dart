@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:datlichhen/core/routing/app_routes.dart';
@@ -60,9 +62,28 @@ class _PatientListPageState extends State<PatientListPage> {
   }
 
   Future<void> _delete(String id) async {
-    await _deletePatient(id);
-    _showSuccessDialog("Xóa bệnh nhân thành công", "Dữ liệu đã được cập nhật");
-    await _loadPatients();
+    try {
+      // 🔹 Tìm bệnh nhân cần xóa để kiểm tra có ảnh local hay không
+      final patient = _patients.firstWhere((d) => d.documentId == id);
+
+      // 🔹 Nếu ảnh là file local (không phải link Firebase), thì xóa luôn file đó
+      if (patient.imgUrl.isNotEmpty &&
+          !patient.imgUrl.startsWith('http') &&
+          File(patient.imgUrl).existsSync()) {
+        File(patient.imgUrl).deleteSync();
+      }
+
+      // 🔹 Xóa dữ liệu bệnh nhân trong Firestore
+      await _deletePatient(id);
+
+      // 🔹 Hiển thị thông báo thành công
+      _showSuccessDialog("Xóa bệnh nhân thành công", "Dữ liệu đã được xóa");
+
+      // 🔹 Cập nhật lại danh sách
+      await _loadPatients();
+    } catch (e) {
+      debugPrint("❌ Lỗi khi xóa bệnh nhân: $e");
+    }
   }
 
   Future<void> _openForm([Patient? patient]) async {
@@ -269,6 +290,36 @@ class _PatientListPageState extends State<PatientListPage> {
     );
   }
 
+  Widget _buildPatientImage(Patient patient) {
+    if (patient.imgUrl.isEmpty) {
+      return const CircleAvatar(
+        radius: 32,
+        backgroundImage: AssetImage('assets/images/default_doctor.png'),
+      );
+    }
+
+    final imgPath = patient.imgUrl;
+
+    // Nếu là file local có thật trong máy
+    if (File(imgPath).existsSync()) {
+      return CircleAvatar(
+        radius: 32,
+        backgroundImage: FileImage(File(imgPath)),
+      );
+    }
+
+    // Nếu là link trên mạng (Firebase, v.v.)
+    if (imgPath.startsWith('http')) {
+      return CircleAvatar(radius: 32, backgroundImage: NetworkImage(imgPath));
+    }
+
+    // fallback: ảnh mặc định
+    return const CircleAvatar(
+      radius: 32,
+      backgroundImage: AssetImage('assets/images/default_doctor.png'),
+    );
+  }
+
   Widget _buildPatientCard(Patient patient) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -291,13 +342,7 @@ class _PatientListPageState extends State<PatientListPage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundImage: patient.imgUrl.isNotEmpty
-                    ? NetworkImage(patient.imgUrl)
-                    : const AssetImage('assets/images/default_doctor.png')
-                          as ImageProvider,
-              ),
+              _buildPatientImage(patient),
               const SizedBox(width: 14),
 
               // Thông tin bệnh nhân

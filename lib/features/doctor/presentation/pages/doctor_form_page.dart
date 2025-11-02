@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:datlichhen/features/doctor/domain/entities/doctor_entity.dart';
 import 'package:datlichhen/features/doctor/domain/usecases/create_doctor_usecase.dart';
 import 'package:datlichhen/features/doctor/domain/usecases/update_doctor_usecase.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class DoctorFormPage extends StatefulWidget {
   final Doctor? doctor;
@@ -26,6 +30,9 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
 
   String _imgUrl = '';
 
+  final ImagePicker _picker = ImagePicker();
+  File? _localImage;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +42,9 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
       _phoneController.text = d.sdt;
       _chuyenKhoaController.text = d.chuyenKhoa;
       _imgUrl = d.imgUrl;
+      if (_imgUrl.isNotEmpty && File(_imgUrl).existsSync()) {
+        _localImage = File(_imgUrl);
+      }
     }
   }
 
@@ -125,6 +135,33 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
+  }
+
+  /// 📷 Chọn ảnh và lưu vào local (không phải assets)
+  Future<void> _pickAndSaveImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery, // hoặc ImageSource.camera
+        imageQuality: 80,
+      );
+
+      if (pickedFile == null) return;
+
+      // 📂 Lấy thư mục local của app
+      final directory = await getApplicationDocumentsDirectory();
+      final String newPath =
+          '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.png';
+
+      // 📸 Sao chép ảnh người dùng chọn vào local app
+      final savedImage = await File(pickedFile.path).copy(newPath);
+
+      setState(() {
+        _localImage = savedImage;
+        _imgUrl = savedImage.path; // Lưu đường dẫn file local
+      });
+    } catch (e) {
+      print('❌ Lỗi khi chọn ảnh: $e');
+    }
   }
 
   Future<void> _saveDoctor() async {
@@ -259,7 +296,6 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
 
               const SizedBox(height: 30),
 
-              /// 🖼 Ảnh bác sĩ + icon upload
               Center(
                 child: Column(
                   children: [
@@ -267,12 +303,15 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
                       alignment: Alignment.bottomRight,
                       children: [
                         CircleAvatar(
-                          radius: 40,
+                          radius: 45,
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: _imgUrl.isNotEmpty
-                              ? NetworkImage(_imgUrl)
+                          backgroundImage: _localImage != null
+                              ? FileImage(_localImage!)
+                              : (_imgUrl.isNotEmpty &&
+                                    File(_imgUrl).existsSync())
+                              ? FileImage(File(_imgUrl))
                               : null,
-                          child: _imgUrl.isEmpty
+                          child: (_localImage == null && _imgUrl.isEmpty)
                               ? const Icon(
                                   Icons.person,
                                   size: 45,
@@ -280,16 +319,19 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
                                 )
                               : null,
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.add_a_photo,
-                            color: Colors.white,
-                            size: 16,
+                        GestureDetector(
+                          onTap: _pickAndSaveImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.add_a_photo,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],

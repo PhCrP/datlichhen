@@ -2,6 +2,7 @@ import 'package:datlichhen/features/doctor/presentation/pages/doctor_list_page.d
 import 'package:datlichhen/features/patient/presentation/pages/patient_list_page.dart';
 import 'package:datlichhen/features/appointment/presentation/pages/appointment_page.dart';
 import 'package:datlichhen/features/notification/presentation/pages/notification_page.dart';
+import 'package:datlichhen/features/profile/presentation/pages/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,12 +41,17 @@ class AppGoRouter {
       ),
       GoRoute(
         path: AppRoutes.appointment,
-        builder: (context, state) => const AppointmentPage(),
+        builder: (context, state) => const AppointmentListPage(),
       ),
 
       GoRoute(
         path: AppRoutes.notification,
         builder: (context, state) => const NotificationPage(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfilePage(),
       ),
     ],
 
