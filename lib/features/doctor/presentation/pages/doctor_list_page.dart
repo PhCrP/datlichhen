@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:datlichhen/core/routing/app_routes.dart';
@@ -60,9 +62,28 @@ class _DoctorListPageState extends State<DoctorListPage> {
   }
 
   Future<void> _delete(String id) async {
-    await _deleteDoctor(id);
-    _showSuccessDialog("Xóa bác sĩ thành công", "Dữ liệu đã được cập nhật");
-    await _loadDoctors();
+    try {
+      // 🔹 Tìm bác sĩ cần xóa để kiểm tra có ảnh local hay không
+      final doctor = _doctors.firstWhere((d) => d.documentId == id);
+
+      // 🔹 Nếu ảnh là file local (không phải link Firebase), thì xóa luôn file đó
+      if (doctor.imgUrl.isNotEmpty &&
+          !doctor.imgUrl.startsWith('http') &&
+          File(doctor.imgUrl).existsSync()) {
+        File(doctor.imgUrl).deleteSync();
+      }
+
+      // 🔹 Xóa dữ liệu bác sĩ trong Firestore
+      await _deleteDoctor(id);
+
+      // 🔹 Hiển thị thông báo thành công
+      _showSuccessDialog("Xóa bác sĩ thành công", "Dữ liệu đã được xóa");
+
+      // 🔹 Cập nhật lại danh sách
+      await _loadDoctors();
+    } catch (e) {
+      debugPrint("❌ Lỗi khi xóa bác sĩ: $e");
+    }
   }
 
   Future<void> _openForm([Doctor? doctor]) async {
@@ -393,6 +414,37 @@ class _DoctorListPageState extends State<DoctorListPage> {
     );
   }
 
+  /// 🧩 Hàm helper hiển thị ảnh bác sĩ (ưu tiên ảnh local)
+  Widget _buildDoctorImage(Doctor doctor) {
+    if (doctor.imgUrl.isEmpty) {
+      return const CircleAvatar(
+        radius: 32,
+        backgroundImage: AssetImage('assets/images/default_doctor.png'),
+      );
+    }
+
+    final imgPath = doctor.imgUrl;
+
+    // Nếu là file local có thật trong máy
+    if (File(imgPath).existsSync()) {
+      return CircleAvatar(
+        radius: 32,
+        backgroundImage: FileImage(File(imgPath)),
+      );
+    }
+
+    // Nếu là link trên mạng (Firebase, v.v.)
+    if (imgPath.startsWith('http')) {
+      return CircleAvatar(radius: 32, backgroundImage: NetworkImage(imgPath));
+    }
+
+    // fallback: ảnh mặc định
+    return const CircleAvatar(
+      radius: 32,
+      backgroundImage: AssetImage('assets/images/default_doctor.png'),
+    );
+  }
+
   Widget _buildDoctorCard(Doctor doctor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -415,13 +467,8 @@ class _DoctorListPageState extends State<DoctorListPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Ảnh bác sĩ
-              CircleAvatar(
-                radius: 32,
-                backgroundImage: doctor.imgUrl.isNotEmpty
-                    ? NetworkImage(doctor.imgUrl)
-                    : const AssetImage('assets/images/default_doctor.png')
-                          as ImageProvider,
-              ),
+              // ✅ Ảnh bác sĩ (ưu tiên ảnh người dùng upload)
+              _buildDoctorImage(doctor),
               const SizedBox(width: 14),
 
               // Thông tin bác sĩ
