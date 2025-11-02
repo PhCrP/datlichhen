@@ -1,6 +1,7 @@
-import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '/core/routing/app_routes.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -13,10 +14,23 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Sau 5 giây tự động chuyển đến màn hình đăng nhập
-    Timer(const Duration(seconds: 5), () {
-      context.go('/login');
-    });
+    _checkAuthState();
+  }
+
+  Future<void> _checkAuthState() async {
+    // Hiệu ứng splash delay nhẹ
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Kiểm tra trạng thái người dùng hiện tại
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // Nếu chưa đăng nhập → vào Login
+      if (mounted) context.go(AppRoutes.login);
+    } else {
+      // Nếu đã đăng nhập → vào Home
+      if (mounted) context.go(AppRoutes.home);
+    }
   }
 
   @override
@@ -27,40 +41,14 @@ class _SplashPageState extends State<SplashPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF4CAF50), // Xanh lá tươi ở trên
-              Color(0xFFFFFFFF), // Trắng ở dưới
-            ],
+            colors: [Color(0xFF4CAF50), Color(0xFFFFFFFF)],
           ),
         ),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo (ảnh splash bạn gửi)
-              Image.asset(
-                'assets/images/3Care.png', // Đặt đúng tên ảnh của bạn
-                width: 200,
-                height: 200,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "3Care",
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1976D2), // Màu xanh dương logo
-                ),
-              ),
-              const Text(
-                "BOOKING MEDICAL",
-                style: TextStyle(
-                  fontSize: 16,
-                  letterSpacing: 1.5,
-                  color: Color(0xFF1976D2),
-                ),
-              ),
-            ],
+          child: Image.asset(
+            'assets/images/3Care.png',
+            width: 200,
+            height: 200,
           ),
         ),
       ),

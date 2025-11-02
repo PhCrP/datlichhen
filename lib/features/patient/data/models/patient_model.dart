@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:datlichhen/features/auth/presentation/pages/sign_up_page.dart';
 import '../../domain/entities/patient_entity.dart';
 
 /// 🩺 Model cho tầng Data — biểu diễn dữ liệu bệnh nhân trong Firestore
@@ -11,6 +12,7 @@ class PatientModel extends Patient {
     required super.phone,
     required super.address,
     required super.symptom,
+    required super.imgUrl,
     required super.createdAt,
     super.updatedAt,
   });
@@ -27,6 +29,7 @@ class PatientModel extends Patient {
       phone: data['phone'] ?? '',
       address: data['address'] ?? '',
       symptom: data['symptom'] ?? '',
+      imgUrl: data['imgUrl'] ?? '',
       createdAt: _parseDate(data['createdAt']),
       updatedAt: data['updatedAt'] == null
           ? null
@@ -43,6 +46,7 @@ class PatientModel extends Patient {
       'phone': phone,
       'address': address,
       'symptom': symptom,
+      'imgUrl': imgUrl,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
@@ -58,6 +62,7 @@ class PatientModel extends Patient {
       phone: entity.phone,
       address: entity.address,
       symptom: entity.symptom,
+      imgUrl: entity.imgUrl,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -73,6 +78,7 @@ class PatientModel extends Patient {
       phone: phone,
       address: address,
       symptom: symptom,
+      imgUrl: imgUrl,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

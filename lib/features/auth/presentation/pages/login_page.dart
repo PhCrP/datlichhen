@@ -37,23 +37,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     width: 120,
                     height: 120,
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '3Care',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1976D2),
-                    ),
-                  ),
-                  const Text(
-                    'BOOKING MEDICAL',
-                    style: TextStyle(
-                      fontSize: 14,
-                      letterSpacing: 1.2,
-                      color: Color(0xFF1976D2),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 40),

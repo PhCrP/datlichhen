@@ -26,7 +26,6 @@ class _PatientFormPageState extends State<PatientFormPage> {
   final _symptomController = TextEditingController();
   DateTime? _birthdate;
   String _gender = "Nam";
-
   String _imgUrl = "";
 
   @override
@@ -38,6 +37,7 @@ class _PatientFormPageState extends State<PatientFormPage> {
       _phoneController.text = p.phone;
       _addressController.text = p.address;
       _symptomController.text = p.symptom;
+      _imgUrl = p.imgUrl;
       _birthdate = p.birthdate;
       _gender = p.gender;
     }
@@ -149,6 +149,7 @@ class _PatientFormPageState extends State<PatientFormPage> {
       phone: _phoneController.text.trim(),
       address: _addressController.text.trim(),
       symptom: _symptomController.text.trim(),
+      imgUrl: _imgUrl,
       createdAt: widget.patient?.createdAt ?? now,
       updatedAt: now,
     );

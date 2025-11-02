@@ -6,6 +6,7 @@ class Patient {
   final String phone; // 📞 Số điện thoại (tùy chọn)
   final String address; // 🏠 Địa chỉ
   final String symptom; // 🤒 Triệu chứng (ho, sốt,...)
+  final String imgUrl; // 🖼️ Ảnh đại diện bệnh nhân
   final DateTime createdAt; // ⏰ Thời điểm thêm bệnh nhân
   final DateTime? updatedAt; // 🔄 Thời điểm chỉnh sửa (tùy chọn)
 
@@ -17,6 +18,7 @@ class Patient {
     required this.phone,
     required this.address,
     required this.symptom,
+    required this.imgUrl,
     required this.createdAt,
     this.updatedAt,
   });
@@ -30,6 +32,7 @@ class Patient {
     String? phone,
     String? address,
     String? symptom,
+    String? imgUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -41,6 +44,7 @@ class Patient {
       phone: phone ?? this.phone,
       address: address ?? this.address,
       symptom: symptom ?? this.symptom,
+      imgUrl: imgUrl ?? this.imgUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -56,6 +60,7 @@ class Patient {
       'phone': phone,
       'address': address,
       'symptom': symptom,
+      'ImgUrl': imgUrl,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -73,6 +78,7 @@ class Patient {
       phone: map['phone'] ?? '',
       address: map['address'] ?? '',
       symptom: map['symptom'] ?? '',
+      imgUrl: map['ImgUrl'] ?? '',
       createdAt: map['createdAt'] is String
           ? DateTime.tryParse(map['createdAt']) ?? DateTime.now()
           : (map['createdAt']?.toDate() ?? DateTime.now()),

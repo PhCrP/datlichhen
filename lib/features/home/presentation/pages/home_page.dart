@@ -1,4 +1,5 @@
 import 'package:datlichhen/core/routing/app_routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -84,7 +85,81 @@ class _HomePageState extends State<HomePage> {
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         icon: _pngIcon('assets/icons/menu.png', size: 28.5),
-                        onPressed: () {},
+                        onPressed: () async {
+                          final selected = await showMenu<String>(
+                            context: context,
+                            position: const RelativeRect.fromLTRB(
+                              1000,
+                              80,
+                              10,
+                              0,
+                            ), // vị trí hiển thị menu
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            items: [
+                              PopupMenuItem<String>(
+                                value: 'profile',
+                                child: Row(
+                                  children: [
+                                    _pngIcon(
+                                      'assets/images/profile.png',
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Text('Hồ sơ'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem<String>(
+                                value: 'settings',
+                                child: Row(
+                                  children: [
+                                    _pngIcon(
+                                      'assets/images/settings.png',
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Text('Cài đặt'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuDivider(height: 8),
+                              PopupMenuItem<String>(
+                                value: 'logout',
+                                child: Row(
+                                  children: [
+                                    _pngIcon(
+                                      'assets/images/logout.png',
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Text(
+                                      'Đăng xuất',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+
+                          // 🔹 Xử lý hành động khi chọn menu
+                          switch (selected) {
+                            case 'profile':
+                              context.push(
+                                AppRoutes.notification,
+                              ); // ví dụ mở hồ sơ
+                              break;
+                            case 'settings':
+                              // TODO: mở trang cài đặt
+                              break;
+                            case 'logout':
+                              await FirebaseAuth.instance.signOut();
+                              if (mounted) context.go(AppRoutes.login);
+                              break;
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -143,104 +218,113 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNavBar(),
+    );
+  }
 
-          // 🔹 BottomNavigationBar
-          Container(
-            padding: const EdgeInsets.only(top: 10),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, -3),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
-              ),
-              child: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                currentIndex: _currentIndex,
-                onTap: (index) {
-                  setState(() => _currentIndex = index);
-                  if (index == 0) context.push(AppRoutes.home);
-                  if (index == 1) context.push(AppRoutes.doctor);
-                  if (index == 2) context.push(AppRoutes.patient);
-                  if (index == 3) context.push(AppRoutes.appointment);
-                },
-                backgroundColor: Colors.white,
-                selectedItemColor: Colors.green,
-                unselectedItemColor: Colors.black,
+  BottomNavigationBarItem _buildNavItem(String iconPath, String label) {
+    return BottomNavigationBarItem(
+      icon: Image.asset(iconPath, width: 24, height: 24, color: Colors.black),
+      label: label,
+    );
+  }
 
-                items: [
-                  BottomNavigationBarItem(
-                    icon: _pngIcon(
-                      'assets/icons/home.png',
-                      color: Colors.black,
-                    ),
-                    activeIcon: _pngIcon(
-                      'assets/icons/home.png',
-                      color: Colors.green,
-                    ),
-                    label: 'Trang chủ',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _pngIcon(
-                      'assets/icons/doctor.png',
-                      color: Colors.black,
-                    ),
-                    activeIcon: _pngIcon(
-                      'assets/icons/doctor.png',
-                      color: Colors.green,
-                    ),
-                    label: 'Bác sĩ',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _pngIcon(
-                      'assets/icons/patient.png',
-                      color: Colors.black,
-                    ),
-                    activeIcon: _pngIcon(
-                      'assets/icons/patient.png',
-                      color: Colors.green,
-                    ),
-                    label: 'Bệnh nhân',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _pngIcon(
-                      'assets/icons/calendar.png',
-                      color: Colors.black,
-                    ),
-                    activeIcon: _pngIcon(
-                      'assets/icons/calendar.png',
-                      color: Colors.green,
-                    ),
-                    label: 'Lịch hẹn',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _pngIcon(
-                      'assets/icons/profile.png',
-                      color: Colors.black,
-                    ),
-                    activeIcon: _pngIcon(
-                      'assets/icons/profile.png',
-                      color: Colors.green,
-                    ),
-                    label: 'Hồ sơ',
-                  ),
-                ],
-              ),
-            ),
+  Widget _buildBottomNavBar() {
+    const int itemCount = 5;
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, -3),
           ),
         ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final double itemWidth = constraints.maxWidth / itemCount;
+
+          // ✅ Xác định độ rộng vạch xanh theo vị trí
+          final double indicatorWidth = _currentIndex == 0
+              ? 25
+              : 35; // Home ngắn hơn
+
+          // ✅ Căn giữa icon
+          final double indicatorLeft =
+              _currentIndex * itemWidth + (itemWidth - indicatorWidth) / 2;
+
+          return Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              // 🔹 Vạch xanh trên cùng
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                top: 0,
+                left: indicatorLeft,
+                child: Container(
+                  width: indicatorWidth,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.horizontal(
+                      left: _currentIndex == 0
+                          ? const Radius.circular(2)
+                          : Radius.zero,
+                      right: _currentIndex == itemCount - 1
+                          ? const Radius.circular(2)
+                          : Radius.zero,
+                    ),
+                  ),
+                ),
+              ),
+
+              // 🔹 BottomNavigationBar
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                  ),
+                  child: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    currentIndex: _currentIndex,
+                    backgroundColor: Colors.white,
+                    selectedItemColor: Colors.black,
+                    unselectedItemColor: Colors.black,
+                    showSelectedLabels: true,
+                    showUnselectedLabels: true,
+                    onTap: (index) {
+                      setState(() => _currentIndex = index);
+                      if (index == 0) context.push(AppRoutes.home);
+                      if (index == 1) context.push(AppRoutes.doctor);
+                      if (index == 2) context.push(AppRoutes.patient);
+                      if (index == 3) context.push(AppRoutes.appointment);
+                      if (index == 4) context.push(AppRoutes.profile);
+                    },
+                    items: [
+                      _buildNavItem('assets/icons/home.png', 'Trang chủ'),
+                      _buildNavItem('assets/icons/doctor.png', 'Bác sĩ'),
+                      _buildNavItem('assets/icons/patient.png', 'Bệnh nhân'),
+                      _buildNavItem('assets/icons/calendar.png', 'Lịch hẹn'),
+                      _buildNavItem('assets/icons/profile.png', 'Hồ sơ'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
