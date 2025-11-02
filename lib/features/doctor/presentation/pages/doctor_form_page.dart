@@ -46,17 +46,59 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
     super.dispose();
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
+  void _showSuccessDialog(String message, String subMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 60),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              subMessage,
+              style: const TextStyle(color: Colors.black54, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+              ),
+              onPressed: () {
+                Navigator.pop(context); // đóng dialog
+                Navigator.pop(context, true); // quay lại trang danh sách
+              },
+              child: const Text("OK",
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
+            )
+          ],
+        ),
       ),
     );
   }
 
+  /// ✅ Validate logic
   bool _validate() {
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final chuyenKhoa = _chuyenKhoaController.text.trim();
+
     if (_nameController.text.trim().isEmpty) {
       _showError("Vui lòng nhập họ và tên bác sĩ");
       return false;
@@ -70,6 +112,17 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
       return false;
     }
     return true;
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(fontSize: 15)),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   Future<void> _saveDoctor() async {
@@ -89,12 +142,11 @@ class _DoctorFormPageState extends State<DoctorFormPage> {
 
     if (widget.doctor == null) {
       await widget.addUseCase(doctor);
+      _showSuccessDialog("Thêm bác sĩ thành công", "Dữ liệu đã được lưu");
     } else {
       await widget.updateUseCase(doctor);
+      _showSuccessDialog("Cập nhật bác sĩ thành công", "Dữ liệu đã được cập nhật");
     }
-
-    // Quay lại sau khi lưu
-    Navigator.pop(context, true);
   }
 
   @override
