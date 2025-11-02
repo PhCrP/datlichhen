@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:datlichhen/core/routing/app_routes.dart';
 import 'doctor_form_page.dart';
 import 'package:datlichhen/features/doctor/domain/entities/doctor_entity.dart';
 import 'package:datlichhen/features/doctor/data/datasources/doctor_remote_datasource.dart';
@@ -17,6 +19,8 @@ class DoctorListPage extends StatefulWidget {
 }
 
 class _DoctorListPageState extends State<DoctorListPage> {
+  int _currentIndex = 1;
+
   late final _remote = DoctorRemoteDataSourceImpl();
   late final _repo = DoctorRepositoryImpl(_remote);
 
@@ -35,52 +39,6 @@ class _DoctorListPageState extends State<DoctorListPage> {
   void initState() {
     super.initState();
     _loadDoctors();
-  }
-
-    void _showSuccessDialog(String message, String subMessage) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 60),
-            const SizedBox(height: 10),
-            Text(
-              message,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 5),
-            Text(
-              subMessage,
-              style: const TextStyle(color: Colors.black54, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-              ),
-              onPressed: () {
-                Navigator.pop(context); // đóng dialog
-              },
-              child: const Text("OK",
-                  style: TextStyle(color: Colors.white, fontSize: 16)),
-            )
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _loadDoctors() async {
@@ -121,95 +79,45 @@ class _DoctorListPageState extends State<DoctorListPage> {
     if (result == true) _loadDoctors();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF5F5F5),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: const Text(
-          'Quản lý bác sĩ',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-      ),
-
-      // Body chính
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  void _showSuccessDialog(String message, String subMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Nút "Thêm bác sĩ"
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _openForm(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff007AFF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                child: const Text(
-                  'Thêm bác sĩ',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
+            const Icon(Icons.check_circle, color: Colors.green, size: 60),
             const SizedBox(height: 10),
-
-            // Ô tìm kiếm
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Tìm bác sĩ...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                border: OutlineInputBorder(
+            Text(
+              message,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              subMessage,
+              style: const TextStyle(color: Colors.black54, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
                 ),
               ),
-              onChanged: (value) {
-                setState(() => _searchQuery = value.trim());
-                _search();
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Danh sách bác sĩ
-            Expanded(
-              child: _doctors.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Không có bác sĩ nào!',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: _doctors.length,
-                      itemBuilder: (context, index) {
-                        final doctor = _doctors[index];
-                        return _buildDoctorCard(doctor);
-                      },
-                    ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "OK",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
             ),
           ],
         ),
@@ -217,86 +125,378 @@ class _DoctorListPageState extends State<DoctorListPage> {
     );
   }
 
-  // Widget hiển thị thẻ bác sĩ
+  Widget _pngIcon(
+    String path, {
+    double size = 24,
+    Color? color,
+    BoxFit fit = BoxFit.contain,
+  }) {
+    return Image.asset(
+      path,
+      width: size,
+      height: size,
+      color: color,
+      fit: fit,
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.error, color: Colors.red, size: 20),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      body: Column(
+        children: [
+          // Thanh xanh trên cùng
+          Container(height: 43.27, color: const Color(0xFF43B02A)),
+
+          // AppBar trắng
+          Container(
+            height: 95,
+            decoration: const BoxDecoration(color: Colors.white),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 0,
+                left: 8,
+                right: 8,
+                bottom: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.black,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Text(
+                    'Quản lý bác sĩ',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 40),
+                ],
+              ),
+            ),
+          ),
+
+          // ✅ Khu thêm + tìm kiếm
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _openForm(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff007AFF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text(
+                      'Thêm bác sĩ',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Tìm bác sĩ...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(
+                        color: Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.trim());
+                    _search();
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ✅ Khối bao danh sách
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                top: 0,
+                left: 16,
+                right: 16,
+                bottom: 0,
+              ),
+              child: Container(
+                height: 515,
+                width: double.infinity,
+                padding: const EdgeInsets.only(
+                  top: 0,
+                  left: 16,
+                  right: 16,
+                  bottom: 0,
+                ),
+                decoration: BoxDecoration(
+                  color: Color(0xFFEAEAEA),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: _doctors.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Không có bác sĩ nào!',
+                          style: TextStyle(color: Colors.black54, fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: _doctors.length,
+                        itemBuilder: (context, index) {
+                          return _buildDoctorCard(_doctors[index]);
+                        },
+                      ),
+              ),
+            ),
+          ),
+
+          // ✅ Bottom nav bar
+          _buildBottomNavBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      padding: const EdgeInsets.only(top: 10),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, -3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _currentIndex,
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.black,
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+            if (index == 0) context.push(AppRoutes.home);
+            if (index == 1) context.push(AppRoutes.doctor);
+            if (index == 2) context.push(AppRoutes.patient);
+            if (index == 3) context.push(AppRoutes.appointment);
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: _pngIcon('assets/icons/home.png', color: Colors.black),
+              activeIcon: _pngIcon(
+                'assets/icons/home.png',
+                color: Colors.green,
+              ),
+              label: 'Trang chủ',
+            ),
+            BottomNavigationBarItem(
+              icon: _pngIcon('assets/icons/doctor.png', color: Colors.black),
+              activeIcon: _pngIcon(
+                'assets/icons/doctor.png',
+                color: Colors.green,
+              ),
+              label: 'Bác sĩ',
+            ),
+            BottomNavigationBarItem(
+              icon: _pngIcon('assets/icons/patient.png', color: Colors.black),
+              activeIcon: _pngIcon(
+                'assets/icons/patient.png',
+                color: Colors.green,
+              ),
+              label: 'Bệnh nhân',
+            ),
+            BottomNavigationBarItem(
+              icon: _pngIcon('assets/icons/calendar.png', color: Colors.black),
+              activeIcon: _pngIcon(
+                'assets/icons/calendar.png',
+                color: Colors.green,
+              ),
+              label: 'Lịch hẹn',
+            ),
+            BottomNavigationBarItem(
+              icon: _pngIcon('assets/icons/profile.png', color: Colors.black),
+              activeIcon: _pngIcon(
+                'assets/icons/profile.png',
+                color: Colors.green,
+              ),
+              label: 'Hồ sơ',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDoctorCard(Doctor doctor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 6,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Ảnh bác sĩ
-            CircleAvatar(
-              radius: 30,
-              backgroundImage: doctor.imgUrl.isNotEmpty
-                  ? NetworkImage(doctor.imgUrl)
-                  : const AssetImage('assets/images/default_doctor.png')
-                      as ImageProvider,
-            ),
-            const SizedBox(width: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Ảnh bác sĩ
+              CircleAvatar(
+                radius: 32,
+                backgroundImage: doctor.imgUrl.isNotEmpty
+                    ? NetworkImage(doctor.imgUrl)
+                    : const AssetImage('assets/images/default_doctor.png')
+                          as ImageProvider,
+              ),
+              const SizedBox(width: 14),
 
-            // Thông tin bác sĩ
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'BS. ${doctor.hoTen}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              // Thông tin bác sĩ
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BS. ${doctor.hoTen}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Chuyên khoa: ${doctor.chuyenKhoa}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'SĐT: ${doctor.sdt}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // 🔹 Hai nút Cập nhật & Xóa cách đều rìa
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Nút Cập nhật
+              SizedBox(
+                width: 130,
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: () => _openForm(doctor),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFA4AAAE),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Cập nhật",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Chuyên khoa: ${doctor.chuyenKhoa}',
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                  Text(
-                    'SĐT: ${doctor.sdt}',
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                ],
+                ),
               ),
-            ),
 
-            // Nút Sửa và Xóa
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _roundedButton(
-                  text: "Cập nhật",
-                  color: Colors.grey.shade400,
-                  onPressed: () => _openForm(doctor),
-                ),
-                const SizedBox(height: 8),
-                _roundedButton(
-                  text: "Xóa",
-                  color: Colors.redAccent,
+              // Nút Xóa
+              SizedBox(
+                width: 130,
+                height: 40,
+                child: ElevatedButton(
                   onPressed: () => _delete(doctor.documentId),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFE90C0C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.zero,
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Xóa",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  // Nút Sửa / Xóa
   Widget _roundedButton({
     required String text,
     required Color color,
@@ -306,15 +506,17 @@ class _DoctorListPageState extends State<DoctorListPage> {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         minimumSize: const Size(125, 40),
       ),
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
       ),
     );
   }
