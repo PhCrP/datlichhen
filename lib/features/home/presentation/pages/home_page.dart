@@ -20,7 +20,8 @@ class _HomePageState extends State<HomePage> {
       height: size,
       fit: BoxFit.contain,
       color: color, // áp dụng màu tint nếu cần
-      errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 20, color: Colors.red),
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.error, size: 20, color: Colors.red),
     );
   }
 
@@ -72,7 +73,10 @@ class _HomePageState extends State<HomePage> {
                       IconButton(
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
-                        icon: _pngIcon('assets/icons/notification.png', size: 26),
+                        icon: _pngIcon(
+                          'assets/icons/notification.png',
+                          size: 26,
+                        ),
                         onPressed: () => context.push(AppRoutes.notification),
                       ),
                       const SizedBox(width: 12),
@@ -107,7 +111,10 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
                 child: Column(
                   children: [
                     _buildStatCard(
@@ -122,14 +129,14 @@ class _HomePageState extends State<HomePage> {
                       iconPath: 'assets/icons/patient_2.png',
                       title: "Bệnh nhân",
                       count: 100,
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.patient),
                     ),
                     _buildStatCard(
                       context,
                       iconPath: 'assets/icons/calendar_2.png',
                       title: "Lịch hẹn",
                       count: 13,
-                      onTap: () {},
+                      onTap: () => context.push(AppRoutes.appointment),
                     ),
                   ],
                 ),
@@ -166,35 +173,67 @@ class _HomePageState extends State<HomePage> {
                   setState(() => _currentIndex = index);
                   if (index == 0) context.push(AppRoutes.home);
                   if (index == 1) context.push(AppRoutes.doctor);
+                  if (index == 2) context.push(AppRoutes.patient);
+                  if (index == 3) context.push(AppRoutes.appointment);
                 },
                 backgroundColor: Colors.white,
                 selectedItemColor: Colors.green,
                 unselectedItemColor: Colors.black,
-                
+
                 items: [
                   BottomNavigationBarItem(
-                    icon: _pngIcon('assets/icons/home.png', color: Colors.black),
-                    activeIcon: _pngIcon('assets/icons/home.png', color: Colors.green),
+                    icon: _pngIcon(
+                      'assets/icons/home.png',
+                      color: Colors.black,
+                    ),
+                    activeIcon: _pngIcon(
+                      'assets/icons/home.png',
+                      color: Colors.green,
+                    ),
                     label: 'Trang chủ',
                   ),
                   BottomNavigationBarItem(
-                    icon: _pngIcon('assets/icons/doctor.png', color: Colors.black),
-                    activeIcon: _pngIcon('assets/icons/doctor.png', color: Colors.green),
+                    icon: _pngIcon(
+                      'assets/icons/doctor.png',
+                      color: Colors.black,
+                    ),
+                    activeIcon: _pngIcon(
+                      'assets/icons/doctor.png',
+                      color: Colors.green,
+                    ),
                     label: 'Bác sĩ',
                   ),
                   BottomNavigationBarItem(
-                    icon: _pngIcon('assets/icons/patient.png', color: Colors.black),
-                    activeIcon: _pngIcon('assets/icons/patient.png', color: Colors.green),
+                    icon: _pngIcon(
+                      'assets/icons/patient.png',
+                      color: Colors.black,
+                    ),
+                    activeIcon: _pngIcon(
+                      'assets/icons/patient.png',
+                      color: Colors.green,
+                    ),
                     label: 'Bệnh nhân',
                   ),
                   BottomNavigationBarItem(
-                    icon: _pngIcon('assets/icons/calendar.png', color: Colors.black),
-                    activeIcon: _pngIcon('assets/icons/calendar.png', color: Colors.green),
+                    icon: _pngIcon(
+                      'assets/icons/calendar.png',
+                      color: Colors.black,
+                    ),
+                    activeIcon: _pngIcon(
+                      'assets/icons/calendar.png',
+                      color: Colors.green,
+                    ),
                     label: 'Lịch hẹn',
                   ),
                   BottomNavigationBarItem(
-                    icon: _pngIcon('assets/icons/profile.png', color: Colors.black),
-                    activeIcon: _pngIcon('assets/icons/profile.png', color: Colors.green),
+                    icon: _pngIcon(
+                      'assets/icons/profile.png',
+                      color: Colors.black,
+                    ),
+                    activeIcon: _pngIcon(
+                      'assets/icons/profile.png',
+                      color: Colors.green,
+                    ),
                     label: 'Hồ sơ',
                   ),
                 ],
@@ -208,7 +247,7 @@ class _HomePageState extends State<HomePage> {
 
   // 🔹 Thẻ thống kê (dùng icon PNG)
   Widget _buildStatCard(
-    BuildContext context,{
+    BuildContext context, {
     required String iconPath,
     required String title,
     required int count,
@@ -276,7 +315,11 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: _pngIcon('assets/icons/chart.png', size: 42.66, color: Colors.white),
+                child: _pngIcon(
+                  'assets/icons/chart.png',
+                  size: 42.66,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
