@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datlichhen/core/routing/app_routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +14,45 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  // Hàm build icon PNG với kích thước chuẩn
+  int _doctorCount = 0;
+  int _patientCount = 0;
+
+  bool _isLoading = true;
+
+  /// 🔹 Lấy dữ liệu thật từ Firestore
+  Future<void> _fetchStatistics() async {
+    try {
+      final doctorSnapshot = await FirebaseFirestore.instance
+          .collection('doctors')
+          .get();
+      final patientSnapshot = await FirebaseFirestore.instance
+          .collection('patients')
+          .get();
+
+      setState(() {
+        _doctorCount = doctorSnapshot.size;
+        _patientCount = patientSnapshot.size;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("❌ Lỗi lấy dữ liệu thống kê: $e");
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStatistics();
+  }
+
   Widget _pngIcon(String assetPath, {double size = 24, Color? color}) {
     return Image.asset(
       assetPath,
       width: size,
       height: size,
       fit: BoxFit.contain,
-      color: color, // áp dụng màu tint nếu cần
+      color: color,
       errorBuilder: (_, __, ___) =>
           const Icon(Icons.error, size: 20, color: Colors.red),
     );
@@ -39,7 +71,7 @@ class _HomePageState extends State<HomePage> {
             color: const Color(0xFF43B02A),
           ),
 
-          // 🔹 AppBar trắng có bo góc dưới
+          // 🔹 AppBar trắng có bo góc
           Container(
             height: 97,
             decoration: const BoxDecoration(
@@ -93,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                               80,
                               10,
                               0,
-                            ), // vị trí hiển thị menu
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -124,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                                   ],
                                 ),
                               ),
-                              PopupMenuDivider(height: 8),
+                              const PopupMenuDivider(height: 8),
                               PopupMenuItem<String>(
                                 value: 'logout',
                                 child: Row(
@@ -144,15 +176,9 @@ class _HomePageState extends State<HomePage> {
                             ],
                           );
 
-                          // 🔹 Xử lý hành động khi chọn menu
                           switch (selected) {
                             case 'profile':
-                              context.push(
-                                AppRoutes.notification,
-                              ); // ví dụ mở hồ sơ
-                              break;
-                            case 'settings':
-                              // TODO: mở trang cài đặt
+                              context.push(AppRoutes.profile);
                               break;
                             case 'logout':
                               await FirebaseAuth.instance.signOut();
@@ -168,55 +194,60 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // 🔹 Thẻ thống kê
+          // 🔹 Nội dung thống kê
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Container(
-                margin: const EdgeInsets.only(top: 35),
-                height: 587,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAEAEA),
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
                     ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
-                  horizontal: 16,
-                ),
-                child: Column(
-                  children: [
-                    _buildStatCard(
-                      context,
-                      iconPath: 'assets/icons/doctor_2.png',
-                      title: "Bác sĩ",
-                      count: 13,
-                      onTap: () => context.push(AppRoutes.doctor),
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 35),
+                      height: 587,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAEAEA),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 16,
+                      ),
+                      child: Column(
+                        children: [
+                          _buildStatCard(
+                            context,
+                            iconPath: 'assets/icons/doctor_2.png',
+                            title: "Bác sĩ",
+                            count: _doctorCount,
+                            onTap: () => context.push(AppRoutes.doctor),
+                          ),
+                          _buildStatCard(
+                            context,
+                            iconPath: 'assets/icons/patient_2.png',
+                            title: "Bệnh nhân",
+                            count: _patientCount,
+                            onTap: () => context.push(AppRoutes.patient),
+                          ),
+                          _buildStatCard(
+                            context,
+                            iconPath: 'assets/icons/calendar_2.png',
+                            title: "Lịch hẹn",
+                            count: 13, // Giữ tĩnh theo yêu cầu
+                            onTap: () => context.push(AppRoutes.appointment),
+                          ),
+                        ],
+                      ),
                     ),
-                    _buildStatCard(
-                      context,
-                      iconPath: 'assets/icons/patient_2.png',
-                      title: "Bệnh nhân",
-                      count: 100,
-                      onTap: () => context.push(AppRoutes.patient),
-                    ),
-                    _buildStatCard(
-                      context,
-                      iconPath: 'assets/icons/calendar_2.png',
-                      title: "Lịch hẹn",
-                      count: 13,
-                      onTap: () => context.push(AppRoutes.appointment),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
           ),
         ],
       ),
@@ -252,20 +283,13 @@ class _HomePageState extends State<HomePage> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final double itemWidth = constraints.maxWidth / itemCount;
-
-          // ✅ Xác định độ rộng vạch xanh theo vị trí
-          final double indicatorWidth = _currentIndex == 0
-              ? 25
-              : 35; // Home ngắn hơn
-
-          // ✅ Căn giữa icon
+          final double indicatorWidth = _currentIndex == 0 ? 25 : 35;
           final double indicatorLeft =
               _currentIndex * itemWidth + (itemWidth - indicatorWidth) / 2;
 
           return Stack(
             alignment: Alignment.topCenter,
             children: [
-              // 🔹 Vạch xanh trên cùng
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
@@ -276,19 +300,10 @@ class _HomePageState extends State<HomePage> {
                   height: 3,
                   decoration: BoxDecoration(
                     color: Colors.green,
-                    borderRadius: BorderRadius.horizontal(
-                      left: _currentIndex == 0
-                          ? const Radius.circular(2)
-                          : Radius.zero,
-                      right: _currentIndex == itemCount - 1
-                          ? const Radius.circular(2)
-                          : Radius.zero,
-                    ),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-
-              // 🔹 BottomNavigationBar
               Padding(
                 padding: const EdgeInsets.only(top: 3),
                 child: ClipRRect(
@@ -302,8 +317,6 @@ class _HomePageState extends State<HomePage> {
                     backgroundColor: Colors.white,
                     selectedItemColor: Colors.black,
                     unselectedItemColor: Colors.black,
-                    showSelectedLabels: true,
-                    showUnselectedLabels: true,
                     onTap: (index) {
                       setState(() => _currentIndex = index);
                       if (index == 0) context.push(AppRoutes.home);
@@ -329,7 +342,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🔹 Thẻ thống kê (dùng icon PNG)
   Widget _buildStatCard(
     BuildContext context, {
     required String iconPath,
@@ -359,7 +371,6 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Icon + Text
             Row(
               children: [
                 _pngIcon(iconPath, size: 58),
@@ -389,8 +400,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-
-            // Khối xanh bên phải
             Container(
               height: 90,
               width: 81,
